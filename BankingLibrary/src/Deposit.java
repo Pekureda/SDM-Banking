@@ -1,3 +1,4 @@
+
 public class Deposit implements InterestApplicableProduct{
     public float current_deposit=0;
     public float deposit_total_money_time;
@@ -46,5 +47,6 @@ public class Deposit implements InterestApplicableProduct{
     @Override
     public boolean isDeposit() {
         return false;
+
     }
 }

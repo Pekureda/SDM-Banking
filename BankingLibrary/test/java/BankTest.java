@@ -3,8 +3,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import bank.*;
 
 class BankTest {
     Bank bank;
@@ -21,34 +24,46 @@ class BankTest {
 
     @Test
     void createCustomer() {
-        Bank.LogonData logonData = new Bank.LogonData("username", "password!");
-        Bank.Customer customer = bank.new Customer("John", "Smith", LocalDate.of(2000, 1, 1), logonData);
+        String customerName = "John";
+        String customerSurname = "Smith";
+        LocalDate customerDateOfBirth = LocalDate.of(2000, Month.JANUARY, 1);
+        LogonData logonData = new LogonData("username", "password!");
+        Customer customer = bank.registerCustomer(customerName, customerSurname, customerDateOfBirth, logonData);
 
-        assertEquals(customer, bank.createCustomer(customer));
+        assertNotEquals(customer, null);
+        assertEquals(customer.getName(), customerName);
+        assertEquals(customer.getSurname(), customerSurname);
+        assertEquals(customer.getDateOfBirth(), customerDateOfBirth);
+        // Check logon data?
     }
 
     @Test
     void createAccount() {
-        Bank.LogonData logonData = new Bank.LogonData("username", "password!");
-        Bank.Customer customer = bank.new Customer("John", "Smith", LocalDate.of(2000, 1, 1), logonData);
+        String customerName = "John";
+        String customerSurname = "Smith";
+        LocalDate customerDateOfBirth = LocalDate.of(2000, Month.JANUARY, 1);
+        LogonData logonData = new LogonData("username", "password!");
+        Customer customer = bank.registerCustomer(customerName, customerSurname, customerDateOfBirth, logonData);
 
-        bank.createCustomer(customer);
-        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.createAccount(customer.getCustomerId()));
-        assertEquals(Bank.CreateAccountStatus.FAIL, bank.createAccount(-1));
+        assertNotEquals(customer, null);
+        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.openAccount(customer.getCustomerId()));
+        assertEquals(Bank.CreateAccountStatus.FAIL, bank.openAccount(-1));
     }
 
     @Test
     void logIn() {
-        String username = "username";
-        Bank.LogonData logonData = new Bank.LogonData(username, "password!");
-        Bank.Customer customer = bank.new Customer("John", "Smith", LocalDate.of(2000, 1, 1), logonData);
+        String customerName = "John";
+        String customerSurname = "Smith";
+        LocalDate customerDateOfBirth = LocalDate.of(2000, Month.JANUARY, 1);
+        LogonData logonData = new LogonData("username", "password!");
+        Customer customer = bank.registerCustomer(customerName, customerSurname, customerDateOfBirth, logonData);
 
-        bank.createCustomer(customer);
-        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.createAccount(customer.getCustomerId()));
+        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.openAccount(customer.getCustomerId()));
         assertNotNull(bank.logIn(logonData));
         assertEquals(1, bank.logIn(logonData).size());
-        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.createAccount(customer.getCustomerId()));
+        assertEquals(Bank.CreateAccountStatus.SUCCESS, bank.openAccount(customer.getCustomerId()));
         assertEquals(2, bank.logIn(logonData).size());
-        assertNull(bank.logIn(new Bank.LogonData(username, "wrongPassword?")));
+        assertNotEquals(logonData, new LogonData("username", "wrongPassword?"));
+        assertNull(bank.logIn(new LogonData("username", "wrongPassword?")));
     }
 }
