@@ -18,9 +18,13 @@ public class Bank {
         }
     }
 
-    class Account {
-        // TODO
+
+    public class Account {
+        //todo;
     }
+
+
+
     class Customer {
         private static int nextId = 0;
         public Customer(String name, String surname, LocalDate dateOfBirth, LogonData logonData) {
@@ -29,9 +33,9 @@ public class Bank {
             this.dateOfBirth = dateOfBirth;
             this.logonData = logonData;
             this.customerId = nextId;
+
             nextId++;
 ;        }
-
         private final int customerId;
         private String name;
         private String surname;
@@ -43,6 +47,9 @@ public class Bank {
         }
 
         public String getName() {
+
+            myFatherBank.getMyAccount(this.id);
+
             return this.name;
         }
         public String getSurname() {
