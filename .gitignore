@@ -1,3 +1,10 @@
+#.idea direcotory
+.idea/
+
+#some idea generated files
+BankingLibrary/BankingLibrary.iml
+BankingLibrary/test/test.iml
+
 # Compiled class file
 *.class
 
