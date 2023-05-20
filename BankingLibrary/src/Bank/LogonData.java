@@ -1,4 +1,4 @@
-package bank;
+package Bank;
 
 public class LogonData {
     public LogonData(String username, String password) {

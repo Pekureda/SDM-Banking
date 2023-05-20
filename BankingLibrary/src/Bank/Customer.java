@@ -1,7 +1,6 @@
-package bank;
+package Bank;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Customer {

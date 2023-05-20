@@ -1,4 +1,4 @@
-package bank;
+package Bank;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -14,7 +14,7 @@ public class Bank {
     private int bankId;
     private Map<Integer, List<Account>> accountMap;
     private List<Customer> customerList;
-    //private History history;
+    //private Bank.History history;
 
     // private TransactionExecutor executor;
     // public getTransactionExecutor()

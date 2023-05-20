@@ -7,7 +7,7 @@ import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import bank.*;
+import Bank.*;
 
 class BankTest {
     Bank bank;
