@@ -9,7 +9,8 @@ public class FixedInterestRate implements InterestRate{
 
 
 
-            return for loan;
+            //return for loan;
+            return 0.0;
         } //powinno rzucac error ale errory to na razie jeszcze nie :)
     }
 }

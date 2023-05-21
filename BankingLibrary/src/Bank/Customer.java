@@ -46,6 +46,10 @@ public class Customer {
     }
 
     public List<Account> getAccounts() {
-        return bankRef.getCustomerAccountsById(customerId);
+        return bankRef.getCustomerAccounts(this);
+    }
+
+    Bank getBankRef() {
+        return bankRef;
     }
 }

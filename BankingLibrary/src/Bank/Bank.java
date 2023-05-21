@@ -2,17 +2,17 @@ package Bank;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Bank {
+    public final String bankCode;
 
-    public Bank(int bankId) {
-        this.bankId = bankId;
+    public Bank(String bankCode) {
+        this.bankCode = bankCode;
         accountMap = new HashMap<>();
         customerList = new ArrayList<>();
     }
-
-    private int bankId;
-    private Map<Integer, List<Account>> accountMap;
+    private Map<String, Account> accountMap;
     private List<Customer> customerList;
     //private Bank.History history;
 
@@ -33,15 +33,16 @@ public class Bank {
         return null;
     }
 
-    public CreateAccountStatus openAccount(int customerId) {
-        if (customerList.stream().filter(customer -> customer.getCustomerId() == customerId).count() == 1) {
-            if (accountMap.containsKey(customerId)) {
-                accountMap.get(customerId).add(new Account());
-            }
-            else {
-                accountMap.put(customerId, new ArrayList<>(List.of(new Account())));
-            }
+    public CreateAccountStatus openAccount(int customerId, LogonData credentials) {
+        return openAccount(customerId, credentials, 0, Currency.getInstance("PLN"));
+    }
+    public CreateAccountStatus openAccount(int customerId, LogonData credentials, double startingBalance, Currency currency) {
+        if (logIn(credentials) == null) return CreateAccountStatus.FAIL;
 
+        var customer = customerList.stream().filter(c -> c.getCustomerId() == customerId).toList();
+        if (customer.size() == 1) {
+            Account newAccount = new Account(customer.get(0), startingBalance, currency);
+            accountMap.put(newAccount.getId(), newAccount);
             return CreateAccountStatus.SUCCESS;
         }
         return CreateAccountStatus.FAIL;
@@ -55,7 +56,19 @@ public class Bank {
         return null;
     }
 
-    List<Account> getCustomerAccountsById(Integer customerId) {
-        return accountMap.getOrDefault(customerId, new ArrayList<>());
+    List<Account> getCustomerAccounts(final Customer customer) {
+        return accountMap.values().stream().filter(acc -> acc.getOwner() == customer).toList();
+    }
+
+    boolean executeCommand(Command command) {
+        if (command.execute()) {
+            // TODO: 21/05/2023 Put into history
+            return true;
+        }
+        return false;
+    }
+
+    Account getAccountById(String accountId) {
+        return accountMap.getOrDefault(accountId, null);
     }
 }
