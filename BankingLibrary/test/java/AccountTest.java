@@ -37,7 +37,7 @@ public class AccountTest {
     }
 
     @Test
-    void updateBalance() throws Exception{
+    void updateBalanceBasic() throws Exception{
         account.updateBalance(0.3);
         assertEquals(0.3, account.getBalance(), 0.01);
         account.updateBalance(0.3);
@@ -47,5 +47,14 @@ public class AccountTest {
         account.updateBalance(-0.3);
         assertEquals(0.6, account.getBalance(), 0.01);
         assertThrows(Exception.class, () -> account.updateBalance(-1));
+    }
+
+    @Test
+    void updateBalanceBig() throws Exception{
+        //We should consider moving to BigDecimal
+        account.updateBalance(1);
+        account.updateBalance(10000000000000000.);
+        account.updateBalance(-10000000000000000.);
+        assertEquals(1, account.getBalance(), 0.01);
     }
 }
