@@ -27,7 +27,7 @@ public class Account {
     public double getBalance() {
         return balance;
     }
-    void updateBalance(double delta) throws Exception{
+    public void updateBalance(double delta) throws Exception{
         if (balance + delta < 0.0)
             throw new Exception("Update would result in negative balance");
         balance = balance+delta;
