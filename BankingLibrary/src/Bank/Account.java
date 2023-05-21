@@ -27,7 +27,7 @@ public class Account {
     public double getBalance() {
         return balance;
     }
-    public void updateBalance(double delta) throws Exception{
+    void updateBalance(double delta) throws Exception{
         if (balance + delta < 0.0)
             throw new Exception("Update would result in negative balance");
         balance = balance+delta;
@@ -43,8 +43,8 @@ public class Account {
 
     boolean executeCommand(Command command) {
         if (command.execute()) {
-            // TODO: 21/05/2023 Put into history
-            // TODO: 21/05/2023 Put into bankHistory
+            history.pushBack(command);
+            owner.getBankRef().informCommandExecutionOnAccount(command);
             return true;
         }
         return false;

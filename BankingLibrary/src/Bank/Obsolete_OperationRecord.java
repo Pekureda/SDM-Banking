@@ -1,9 +1,8 @@
 package Bank;
 
-import javax.swing.plaf.MenuBarUI;
 import java.time.LocalDate;
 
-public class OperationRecord{
+public class Obsolete_OperationRecord {
 
     public enum Status{
         SUCCESS,
@@ -14,7 +13,7 @@ public class OperationRecord{
     private String description;
     private String operationCode;
 
-    OperationRecord(Status status, String description, Operation op)
+    Obsolete_OperationRecord(Status status, String description, Obsolete_Operation op)
     {
         this.status = status;
         execution = LocalDate.now();

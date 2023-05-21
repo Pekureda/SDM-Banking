@@ -1,5 +1,6 @@
 package Bank;
 
+import java.time.LocalDateTime;
 import java.util.Currency;
 
 public class OrderTransferCommand implements Command {
@@ -10,6 +11,7 @@ public class OrderTransferCommand implements Command {
         this.currency = currency;
         this.recipientAccountId = recipientAccountId;
         this.text = text;
+        this.executionTime = LocalDateTime.now();
     }
     protected final Bank bank;
     protected final Account sourceAccount;
@@ -17,9 +19,10 @@ public class OrderTransferCommand implements Command {
     protected final Currency currency;
     protected final String recipientAccountId;
     protected final String text;
+    protected final LocalDateTime executionTime;
     @Override
     public boolean execute() {
-        if (sourceAccount.getId().substring(0, bank.bankCode.length()).equals(bank.bankCode)) {
+        if (recipientAccountId.substring(0, bank.bankCode.length()).equals(bank.bankCode)) {
            Account recipientAccount = bank.getAccountById(recipientAccountId);
            if (recipientAccount != null) {
                sourceAccount.executeCommand(new OutgoingTransferCommand(bank, sourceAccount, amount, currency,recipientAccountId, text));
@@ -29,10 +32,15 @@ public class OrderTransferCommand implements Command {
         }
         else {
             sourceAccount.executeCommand(new OutgoingTransferCommand(bank, sourceAccount, amount, currency,recipientAccountId, text));
-            // TODO: 21/05/2023 Execute command externalTransferCommand on interbankSystem
+            bank.interbankMediator.transferNotify(bank, new ExternalTransfer(sourceAccount.getId(), recipientAccountId, text, amount, currency));
             return true;
         }
         // Order rejected
         return false;
+    }
+
+    @Override
+    public LocalDateTime getExecutionTime() {
+        return executionTime;
     }
 }

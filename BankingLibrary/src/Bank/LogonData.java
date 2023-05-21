@@ -11,4 +11,8 @@ public class LogonData {
     public boolean isValid() {
         return this.username.length() > 0 && !this.username.matches("\s") && this.password.length() > 6 && !this.password.matches("\s");
     }
+
+    String getUsername() {
+        return username;
+    }
 }
