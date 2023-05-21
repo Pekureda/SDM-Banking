@@ -1,10 +1,12 @@
+package Bank;
+
 public class CompoundInterest implements InterestRate {
 
 
     @Override
     public Double calculateInterest(InterestApplicableProduct deposit, float percentage) {
         if (deposit.isDeposit()) {
-            return calculateCompoundInterest(deposit.getProductPrincipal(),
+            return calculateCompoundInterest(deposit.getProductPrincipalAmount(),
                     deposit.getProductRate(), deposit.getProductTime(), deposit.getProductCompoundFrequency());
         } else {
 
