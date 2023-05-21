@@ -1,4 +1,6 @@
-public class ReporterString_visitor implements Reporter_visitor{
+package Bank;
+
+public class ReporterStringVisitor implements ReporterVisitor {
 
 
     @Override

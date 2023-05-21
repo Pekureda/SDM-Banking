@@ -1,11 +1,14 @@
-public class SimpleInterestRate implements InterestRate {
+package Bank;
+
+public class VariableInterestRate implements InterestRate {
 
 
     @Override
     public Double calculateInterest(InterestApplicableProduct deposit, float percentage) {
         if (deposit.isDeposit()) {
-            return (double) (deposit.getCurrent_deposit() * percentage*deposit.getDeposit_total_money_time());
+            return (double) (deposit.getProductPrincipalAmount() * percentage);
         } else {
+
 
 
 
@@ -13,7 +16,6 @@ public class SimpleInterestRate implements InterestRate {
             return 0.0;
         } //powinno rzucac error ale errory to na razie jeszcze nie :)
     }
+
+
 }
-
-
-

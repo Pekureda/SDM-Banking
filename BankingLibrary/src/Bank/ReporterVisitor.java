@@ -1,4 +1,6 @@
-public interface Reporter_visitor {
+package Bank;
+
+public interface ReporterVisitor {
 
 
    String reportVisitLoan(Loan loan);

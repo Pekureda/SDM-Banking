@@ -52,4 +52,14 @@ public class AccountTest {
         assertEquals(0.6, account.getBalance(), 0.01);
         //assertThrows(Exception.class, () -> account.updateBalance(-1));
     }
+
+    @Test
+    void updateBalanceBig() throws Exception{
+        //We should consider moving to BigDecimal
+        fail("Do not access data like this. Tests are not a valid reason to change API");
+        //account.updateBalance(1);
+        //account.updateBalance(10000000000000000.);
+        //account.updateBalance(-10000000000000000.);
+        assertEquals(1, account.getBalance(), 0.01);
+    }
 }
