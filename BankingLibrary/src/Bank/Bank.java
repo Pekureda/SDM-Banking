@@ -9,12 +9,14 @@ public class Bank {
 
     public Bank(String bankCode) {
         this.bankCode = bankCode;
-        accountMap = new HashMap<>();
-        customerList = new ArrayList<>();
+        this.accountMap = new HashMap<>();
+        this.customerMap = new HashMap<>();
+        this.history = new History();
     }
     private Map<String, Account> accountMap;
-    private List<Customer> customerList;
-    //private Bank.History history;
+    private Map<String, Customer> customerMap;
+    private History history;
+    InterbankMediator interbankMediator;
 
     // private TransactionExecutor executor;
     // public getTransactionExecutor()
@@ -24,24 +26,28 @@ public class Bank {
         FAIL
     }
 
+    void setInterbankMediator(InterbankMediator mediator) {
+        this.interbankMediator = mediator;
+    }
+
     public Customer registerCustomer(String name, String surname, LocalDate dateOfBirth, LogonData logonData) {
         Customer newCustomer = new Customer(this, name, surname, dateOfBirth, logonData);
-        if (newCustomer.isValid()) {
-            customerList.add(newCustomer);
+        if (newCustomer.isValid() && !customerMap.containsKey(logonData.getUsername())) {
+            customerMap.put(logonData.getUsername(), newCustomer);
             return newCustomer;
         }
         return null;
     }
 
-    public CreateAccountStatus openAccount(int customerId, LogonData credentials) {
-        return openAccount(customerId, credentials, 0, Currency.getInstance("PLN"));
+    public CreateAccountStatus openAccount(LogonData credentials) {
+        return openAccount(credentials, 0, Currency.getInstance("PLN"));
     }
-    public CreateAccountStatus openAccount(int customerId, LogonData credentials, double startingBalance, Currency currency) {
+    public CreateAccountStatus openAccount(LogonData credentials, double startingBalance, Currency currency) {
         if (logIn(credentials) == null) return CreateAccountStatus.FAIL;
 
-        var customer = customerList.stream().filter(c -> c.getCustomerId() == customerId).toList();
-        if (customer.size() == 1) {
-            Account newAccount = new Account(customer.get(0), startingBalance, currency);
+        var customer = customerMap.get(credentials.getUsername());
+        if (customer != null) {
+            Account newAccount = new Account(customer, startingBalance, currency);
             accountMap.put(newAccount.getId(), newAccount);
             return CreateAccountStatus.SUCCESS;
         }
@@ -49,23 +55,50 @@ public class Bank {
     }
 
     public List<Account> logIn(LogonData credentials) {
-        var customer = customerList.stream().filter(elem -> elem.compareLogonData(credentials)).findFirst().orElse(null);
-        if (customer != null) {
-            return customerList.get(customerList.indexOf(customer)).getAccounts();
+        var customer = customerMap.get(credentials.getUsername());
+        if (customer != null && customer.compareLogonData(credentials)) {
+            return customer.getAccounts();
         }
         return null;
     }
 
-    public List<Account> getCustomerAccounts(final Customer customer) {
+    List<Account> getCustomerAccounts(final Customer customer) {
         return accountMap.values().stream().filter(acc -> acc.getOwner() == customer).toList();
     }
 
     boolean executeCommand(Command command) {
         if (command.execute()) {
-            // TODO: 21/05/2023 Put into history
+            history.pushBack(command);
             return true;
         }
         return false;
+    }
+
+    boolean receiveExternalPayment(ExternalTransfer transfer) {
+        if (transfer.getSourceAccountId().equals(bankCode)) {
+            // TODO: 21/05/2023 Transfer as returned money
+            return true;
+        }
+        else if (accountMap.containsKey(transfer.getRecipientAccountId())) {
+            accountMap.get(transfer.getRecipientAccountId())
+                    .executeCommand(
+                            new IncomingTransferCommand(
+                                    this,
+                                    null,
+                                    transfer.getAmount(),
+                                    transfer.getCurrency(),
+                                    transfer.getRecipientAccountId(),
+                                    transfer.getText()
+                            )
+                    );
+            return true;
+        }
+
+        return false;
+    }
+
+    void informCommandExecutionOnAccount(Command command) {
+        history.pushBack(command);
     }
 
     Account getAccountById(String accountId) {
