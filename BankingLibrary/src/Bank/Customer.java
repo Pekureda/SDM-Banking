@@ -1,6 +1,7 @@
 package Bank;
 
 import java.time.LocalDate;
+import java.util.Currency;
 import java.util.List;
 
 public class Customer {
@@ -23,6 +24,8 @@ public class Customer {
     private String surname;
     private LocalDate dateOfBirth;
     private LogonData logonData;
+
+
 
     boolean isValid() {
         return !this.name.isBlank() && !this.surname.isBlank() && dateOfBirth.isBefore(LocalDate.now()) && logonData.isValid();
@@ -54,4 +57,30 @@ public class Customer {
     Bank getBankRef() {
         return bankRef;
     }
+
+
+    public List<Deposit> customerDeposits;
+    public List<Loan> customerLoans;
+    InterestRateStrategy myInterestRateStrategy;
+
+    void takeLoan( Currency currency,double principalAmount, double rate, int time,int compoundFrequency,
+                   InterestRateStrategy concreteInterestRate){
+        Loan E=new Loan(this, currency,principalAmount,rate,time,compoundFrequency,concreteInterestRate);
+
+        this.customerLoans.add(E);
+    };
+    void repayRate(){};
+    void repayLoanFull(){};
+    void makeDeposit( float principalAmount,Currency currency, double rate, int time,int compoundFrequency,
+                      InterestRateStrategy concreteInterestRate){
+        Deposit E=new Deposit(this,  currency, principalAmount,  time,  compoundFrequency,  rate,concreteInterestRate);
+
+        this.customerDeposits.add(E);
+    };
+    void closeDeposit(){};
+
+
+
+
+
 }

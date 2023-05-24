@@ -12,8 +12,11 @@ public class Deposit extends Account implements InterestApplicableProduct{
     public int compoundFrequency;
     public boolean isDeposit=true;
 
-    Deposit(Customer owner, Currency currency,float current_deposit, int time, int compoundFrequency, double rate){
+    public int timeLeft;
+
+    Deposit(Customer owner, Currency currency,float current_deposit, int time, int compoundFrequency, double rate,InterestRateStrategy concreteInterestRate){
         super( owner,  current_deposit,  currency);
+        super.myInterestRateStrategy=concreteInterestRate;
         this.current_deposit=current_deposit;
         this.time=time;//months
         this.compoundFrequency=compoundFrequency;
@@ -22,6 +25,8 @@ public class Deposit extends Account implements InterestApplicableProduct{
         this.interestRate=rate;
 
     }
+
+
 
     @Override
     public double getProductPrincipalAmount() {
@@ -60,5 +65,12 @@ public class Deposit extends Account implements InterestApplicableProduct{
     }
     public void finishDepositEarly(Account accountToGiveMoneyTo){//usun obiekt
 
+    }
+
+    int getTimeLeft(){
+        return this.timeLeft;
+    }
+    void setTimeLeft(int timeleft){
+        this.timeLeft=timeleft;
     }
 }

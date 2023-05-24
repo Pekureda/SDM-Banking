@@ -5,6 +5,9 @@ import java.util.Currency;
 
 
 public class Account implements InterestApplicableProduct {
+    public double interestRate;
+
+    public InterestRateStrategy myInterestRateStrategy;
     private static long idCounter=0;
     private String accountId;
     protected Customer owner;
@@ -12,7 +15,6 @@ public class Account implements InterestApplicableProduct {
     protected double balance;
     private Currency currency;
     private History history;
-    double interestRate;
     Account(Customer owner, double startingBalance, Currency currency) {
         this(owner);
         this.balance = startingBalance;

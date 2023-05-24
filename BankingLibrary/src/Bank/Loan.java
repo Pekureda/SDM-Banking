@@ -61,7 +61,8 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
         return true;
     }
 
-    Loan(Customer owner, Currency currency, double principalAmount, double rate, int time,int compoundFrequency){
+    Loan(Customer owner, Currency currency, double principalAmount, double rate, int time,int compoundFrequency,
+         InterestRateStrategy concreteInterestRateStrategyStrategy){
         super( owner,  principalAmount,  currency);
         this.principalAmount=principalAmount;
         this.interestRate=rate;
@@ -81,6 +82,13 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
             runningBelowInCredits=true;
         }
 
+    }
+
+    int getTimeLeft(){
+        return this.timeLeft;
+    }
+    void setTimeLeft(int timeleft){
+        this.timeLeft=timeleft;
     }
 
 }
