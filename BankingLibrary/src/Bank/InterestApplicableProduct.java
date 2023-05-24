@@ -13,9 +13,9 @@ public interface InterestApplicableProduct {
     int getProductTime();//in months
     int getProductCompoundFrequency();
     void changeInterestRate(double rate);
+    Double calculateInterest();
 
 
-    boolean isDeposit();//no i to chyba powoduje ze to jest chujowy design xd mozna zmienic w takim razie i nie robic tego tym interfejsem
-    //tylko jakos inaczej , moze visitor?
+    boolean isDeposit();
     boolean isLoan();
 }

@@ -60,6 +60,11 @@ public class Deposit extends Account implements InterestApplicableProduct{
     }
 
     @Override
+    public Double calculateInterest() {
+        return  myInterestRateStrategy.calculateInterest(this);
+    }
+
+    @Override
     public boolean isLoan() {
         return false;
     }

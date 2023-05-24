@@ -1,6 +1,7 @@
 package Bank;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
@@ -60,24 +61,33 @@ public class Customer {
 
 
     public List<Deposit> customerDeposits;
+    List<Deposit> getCustomerDeposits(){return customerDeposits;}
     public List<Loan> customerLoans;
+    public List<Loan> getCustomerLoans(){return customerLoans;}
     InterestRateStrategy myInterestRateStrategy;
 
-    void takeLoan( Currency currency,double principalAmount, double rate, int time,int compoundFrequency,
+    public void takeLoan( Currency currency,double principalAmount, double rate, int time,int compoundFrequency,
                    InterestRateStrategy concreteInterestRate){
-        Loan E=new Loan(this, currency,principalAmount,rate,time,compoundFrequency,concreteInterestRate);
+        Loan loan=new Loan(this, currency,principalAmount,rate,time,compoundFrequency,concreteInterestRate);
 
-        this.customerLoans.add(E);
+        if(this.customerLoans==null){
+            this.customerLoans=new ArrayList<Loan>();
+        }
+
+        this.customerLoans.add(loan);
     };
-    void repayRate(){};
-    void repayLoanFull(){};
-    void makeDeposit( float principalAmount,Currency currency, double rate, int time,int compoundFrequency,
+    public void repayRate(){};
+    public void repayLoanFull(){};
+    public void makeDeposit( float principalAmount,Currency currency, double rate, int time,int compoundFrequency,
                       InterestRateStrategy concreteInterestRate){
         Deposit E=new Deposit(this,  currency, principalAmount,  time,  compoundFrequency,  rate,concreteInterestRate);
+        if(this.customerDeposits==null){
+            this.customerDeposits=new ArrayList<Deposit>();
+        }
 
         this.customerDeposits.add(E);
     };
-    void closeDeposit(){};
+    public void closeDeposit(){};
 
 
 

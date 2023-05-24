@@ -12,42 +12,68 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import Bank.Account;
 import Bank.Bank;
 import Bank.Customer;
-import Bank.LogonData;
+import Bank.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Currency;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 public class DepositTest {
 
+    InterbankPaymentSystem interbankPaymentSystem;
+    Bank bankA;
 
+    LogonData logonDataA1;
+    String accountIdA1;
 
 
         Account account;
 
         @BeforeEach
         void setUp() {
-            Bank bank = new Bank("0123");
-            String customerName = "John";
-            String customerSurname = "Smith";
-            LocalDate customerDateOfBirth = LocalDate.of(2000, Month.JANUARY, 1);
+             this.bankA = new Bank("0001");
             LogonData logonData = new LogonData("username", "password!");
-            Customer customer = bank.registerCustomer(customerName, customerSurname, customerDateOfBirth, logonData);
-            bank.openAccount(customer.getCustomerId(), logonData);
-            account = bank.getCustomerAccounts(customer).get(0);
+
+
+            this.logonDataA1 = new LogonData("johnny", "lovesSmithing");
+
+            bankA.registerCustomer("John", "Smith", LocalDate.of(2000, Month.JANUARY, 1), logonDataA1);
+
+            bankA.openAccount(logonDataA1, 1000.0, Currency.getInstance("PLN"));
+
         }
 
         @AfterEach
         void tearDown() {
-            account = null;
+            //bankA=null;
+
+            //account = null;
         }
 
         @Test
-        void getBalance() {
-            assertEquals(0.0, account.getBalance(), 0.01);
+        void takeLoan() {
+            Account accountA = bankA.logIn(logonDataA1).get(0);
+            Customer cuz=bankA.getCustomerMap().get("johnny");
+            InterestRateStrategy concreteStrategy=new CompoundStrategyInterest();
+            cuz.takeLoan(Currency.getInstance("PLN"),1000,0.04,10,1,concreteStrategy);
+/*
+            Account accountA1 = bankA.logIn(logonDataA1);//nie ma sposobu jak rozpoznac czy cos jest pozyczką
+            if(accountA1 instanceof  Loan){
+                 System.out.println("udalo sie jestem pozyczka");
+             }
+             Loan loan=(Loan) accountA1;////////tu nie dziala
+*/
+            Loan loan= cuz.getCustomerLoans().get(0);
+            double dupa=loan.calculateInterest();
+            System.out.println(dupa);
+
+
+
         }
 
 

@@ -2,7 +2,6 @@ package Bank;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Bank {
     public final String bankCode;
@@ -103,5 +102,10 @@ public class Bank {
 
     Account getAccountById(String accountId) {
         return accountMap.getOrDefault(accountId, null);
+    }
+
+    public Map<String, Customer> getCustomerMap(){
+
+        return customerMap;
     }
 }

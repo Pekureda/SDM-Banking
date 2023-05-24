@@ -87,6 +87,11 @@ public class Account implements InterestApplicableProduct {
     }
 
     @Override
+    public Double calculateInterest() {
+        return myInterestRateStrategy.calculateInterest(this);
+    }
+
+    @Override
     public boolean isDeposit() {
         return false;
     }

@@ -52,6 +52,11 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
     }
 
     @Override
+    public Double calculateInterest() {
+        return  myInterestRateStrategy.calculateInterest(this);
+    }
+
+    @Override
     public boolean isDeposit() {
         return false;
     }
@@ -69,6 +74,7 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
         this.time=time;
         this.amountToRepay=principalAmount;
         this.compoundFrequency=compoundFrequency;
+        super.myInterestRateStrategy=concreteInterestRateStrategyStrategy;
 
     }
 
