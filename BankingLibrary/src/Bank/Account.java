@@ -5,16 +5,16 @@ import java.util.Currency;
 
 
 public class Account implements InterestApplicableProduct {
-    public double interestRate;
+    protected double interestRate;
 
     public InterestRateStrategy myInterestRateStrategy;
-    private static long idCounter=0;
-    private String accountId;
+    protected static long idCounter=0;
+    protected String accountId;
     protected Customer owner;
-    private LocalDate opening;
+    protected LocalDate opening;
     protected double balance;
-    private Currency currency;
-    private History history;
+    protected Currency currency;
+    protected History history;
     Account(Customer owner, double startingBalance, Currency currency) {
         this(owner);
         this.balance = startingBalance;
@@ -31,6 +31,12 @@ public class Account implements InterestApplicableProduct {
     public double getBalance() {
         return balance;
     }
+
+    @Override
+    public void setProductPrincipalAmount(double newPrincipalAmount) {
+        this.balance=newPrincipalAmount;
+    }
+
     void updateBalance(double delta) throws Exception{
         if (balance + delta < 0.0)
             throw new Exception("Update would result in negative balance");
@@ -76,9 +82,19 @@ public class Account implements InterestApplicableProduct {
     }
 
     @Override
+    public void setProductTime(int time) {
+        ;//empty here
+    }
+
+    @Override
     public int getProductCompoundFrequency() {//tutaj tak samo jedynka zeby pasowalo do wzoru jakby ktos chcial uzyc startegii compound frequency
 
         return 1;
+    }
+
+    @Override
+    public void setProductCompoundFrequency(int compoundFrequency) {
+        //return 1;
     }
 
     @Override
@@ -89,6 +105,11 @@ public class Account implements InterestApplicableProduct {
     @Override
     public Double calculateInterest() {
         return myInterestRateStrategy.calculateInterest(this);
+    }
+
+    @Override
+    public void setInterestRateStrategy(InterestRateStrategy concreteStrategy) {
+        this.myInterestRateStrategy=concreteStrategy;
     }
 
     @Override

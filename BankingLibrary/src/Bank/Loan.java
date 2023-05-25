@@ -1,6 +1,7 @@
 package Bank;
 
 import java.util.Currency;
+import java.lang.Math;
 
 public class Loan extends Account implements ReportableVisitable , InterestApplicableProduct{
 
@@ -37,12 +38,27 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
 
     @Override
     public int getProductTime() {
-        return 0;
+        return this.time;
+    }
+
+    @Override
+    public void setProductTime(int time) {
+        this.time=time;
     }
 
     @Override
     public int getProductCompoundFrequency() {
         return this.compoundFrequency;
+    }
+
+    @Override
+    public void setProductCompoundFrequency(int compoundFrequency) {
+         this.compoundFrequency=compoundFrequency;
+    }
+
+    @Override
+    public void setProductPrincipalAmount(double newPrincipalAmount) {
+        this.principalAmount=newPrincipalAmount;
     }
 
     @Override
@@ -62,6 +78,11 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
     }
 
     @Override
+    public void setInterestRateStrategy(InterestRateStrategy concreteStrategy) {
+        this.myInterestRateStrategy=concreteStrategy;
+    }
+
+    @Override
     public boolean isLoan() {
         return true;
     }
@@ -78,14 +99,23 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
 
     }
 
-    void addToLoan(double amount){//przydatne w przypadku odsetek
+    public void addToLoan(double amount){//przydatne w przypadku odsetek
         this.amountToRepay+=amount;
     }
-    void repayLoan(double amount){
+
+    public void repayLoan(double amount){
         this.amountToRepay-=amount;
-        super.balance-=amount; //trzeba by sobie odjac kase jak sie to wywoluje
+        super.balance-=amount;
+        //super.balance-=amount; //trzeba by sobie odjac kase jak sie to wywoluje
         if(super.balance<0){
             runningBelowInCredits=true;
+        }
+        if(this.amountToRepay<0.01){
+            this.amountToRepay=0;
+        }
+        if(this.amountToRepay<0){
+            this.amountToRepay=0;
+            super.balance=super.balance+ Math.abs( this.amountToRepay);
         }
 
     }
@@ -97,4 +127,10 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
         this.timeLeft=timeleft;
     }
 
+    public void setAmountToRepay(double amountToRepay) {
+        this.amountToRepay = amountToRepay;
+    }
+    public double getAmountToRepay() {
+        return amountToRepay;
+    }
 }

@@ -3,7 +3,7 @@ package Bank;
 import java.util.Currency;
 
 public class Deposit extends Account implements InterestApplicableProduct{
-    private final float principalAmount;
+    protected final float principalAmount;
     public float current_deposit=0;
     public float deposit_total_money_time;
     public double principal;
@@ -49,6 +49,11 @@ public class Deposit extends Account implements InterestApplicableProduct{
     }
 
     @Override
+    public void setProductCompoundFrequency(int compoundFrequency) {
+         this.compoundFrequency=compoundFrequency;
+    }
+
+    @Override
     public void changeInterestRate(double rate) {
     interestRate=rate;
     }
@@ -70,6 +75,11 @@ public class Deposit extends Account implements InterestApplicableProduct{
     }
     public void finishDepositEarly(Account accountToGiveMoneyTo){//usun obiekt
 
+    }
+
+    @Override
+    public void setInterestRateStrategy(InterestRateStrategy concreteStrategy) {
+        this.myInterestRateStrategy=concreteStrategy;
     }
 
     int getTimeLeft(){
