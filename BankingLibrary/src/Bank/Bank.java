@@ -1,111 +1,83 @@
 package Bank;
 
-import java.time.LocalDate;
+import Bank.Commands.Command;
+import Bank.Commands.InternalTransferCommand;
+
 import java.util.*;
 
 public class Bank {
+    private long nextAccountNumber = 0;
     public final String bankCode;
-
+    private InterbankPaymentSystemMediator interbankPaymentSystem;
     public Bank(String bankCode) {
         this.bankCode = bankCode;
         this.accountMap = new HashMap<>();
         this.customerMap = new HashMap<>();
-        this.history = new History();
+        this.operationHistory = new History();
     }
-    private Map<String, Account> accountMap;
-    private Map<String, Customer> customerMap;
-    private History history;
-    InterbankMediator interbankMediator;
-
-    // private TransactionExecutor executor;
-    // public getTransactionExecutor()
-
-    public enum CreateAccountStatus {
-        SUCCESS,
-        FAIL
+    private Map<String, Account> accountMap; // Key=InBankAccountNumber -> AccountNumber.getInBankAccountNumber()
+    private Map<String, Customer> customerMap; // Key=Username
+    private History operationHistory;
+    public Customer createCustomer(String username, String name, String surname) {
+        if (customerMap.containsKey(username)) {
+            return null;
+        }
+        return customerMap.put(username, new Customer(name, surname, username));
     }
-
-    void setInterbankMediator(InterbankMediator mediator) {
-        this.interbankMediator = mediator;
-    }
-
-    public Customer registerCustomer(String name, String surname, LocalDate dateOfBirth, LogonData logonData) {
-        Customer newCustomer = new Customer(this, name, surname, dateOfBirth, logonData);
-        if (newCustomer.isValid() && !customerMap.containsKey(logonData.getUsername())) {
-            customerMap.put(logonData.getUsername(), newCustomer);
-            return newCustomer;
+    public Account createAccount(Customer customer) {
+        Customer owner;
+        if ((owner = customerMap.get(customer.getUsername())) != null) {
+            AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%010d", nextAccountNumber));
+            nextAccountNumber++;
+            return accountMap.put(newAccountNumber.getInBankAccountNumber(), new Account(this, owner, newAccountNumber));
         }
         return null;
     }
-
-    public CreateAccountStatus openAccount(LogonData credentials) {
-        return openAccount(credentials, 0, Currency.getInstance("PLN"));
+    public Customer getCustomer(String username) {
+        return customerMap.getOrDefault(username, null);
     }
-    public CreateAccountStatus openAccount(LogonData credentials, double startingBalance, Currency currency) {
-        if (logIn(credentials) == null) return CreateAccountStatus.FAIL;
-
-        var customer = customerMap.get(credentials.getUsername());
-        if (customer != null) {
-            Account newAccount = new Account(customer, startingBalance, currency);
-            accountMap.put(newAccount.getId(), newAccount);
-            return CreateAccountStatus.SUCCESS;
+    public List<Account> getCustomerAccounts(Customer customer) {
+        return new ArrayList<>(accountMap.values().stream().filter(acc -> acc.getOwner() == customer).toList());
+    }
+    public Account getAccountByNumber(AccountNumber accountNumber) {
+        if (!accountMap.containsKey(accountNumber.getInBankAccountNumber())) {
+            return null;
         }
-        return CreateAccountStatus.FAIL;
+        return accountMap.get(accountNumber.getInBankAccountNumber());
     }
 
-    public List<Account> logIn(LogonData credentials) {
-        var customer = customerMap.get(credentials.getUsername());
-        if (customer != null && customer.compareLogonData(credentials)) {
-            return customer.getAccounts();
+    public boolean transfer(Account source, AccountNumber destination, double amount, String text) {
+        if (source.getBalance() < amount) {
+            return false;
+            // todo handle debit accounts
         }
-        return null;
-    }
-
-    List<Account> getCustomerAccounts(final Customer customer) {
-        return accountMap.values().stream().filter(acc -> acc.getOwner() == customer).toList();
-    }
-
-    boolean executeCommand(Command command) {
-        if (command.execute()) {
-            history.pushBack(command);
-            return true;
+        if (Objects.equals(destination.getBankIdentifier(), bankCode)) {
+            if (accountMap.containsKey(destination.getInBankAccountNumber())) {
+                Account destinationAccount = accountMap.get(destination.getInBankAccountNumber());
+                executeOperation(new InternalTransferCommand(this, source, destinationAccount, amount, text));
+            }
+            else {
+                return false;
+                // todo such account does not exist in this bank but is internal transfer
+            }
         }
+        else {
+            // todo this is external transfer
+        }
+
+        // Should not reach this point
         return false;
     }
 
-    boolean receiveExternalPayment(ExternalTransfer transfer) {
-        if (transfer.getSourceAccountId().equals(bankCode)) {
-            // TODO: 21/05/2023 Transfer as returned money
-            return true;
-        }
-        else if (accountMap.containsKey(transfer.getRecipientAccountId())) {
-            accountMap.get(transfer.getRecipientAccountId())
-                    .executeCommand(
-                            new IncomingTransferCommand(
-                                    this,
-                                    null,
-                                    transfer.getAmount(),
-                                    transfer.getCurrency(),
-                                    transfer.getRecipientAccountId(),
-                                    transfer.getText()
-                            )
-                    );
-            return true;
-        }
-
-        return false;
+    public boolean executeOperation(Command command) {
+        command.execute();
+        operationHistory.log(command);
+        return true;
     }
-
-    void informCommandExecutionOnAccount(Command command) {
-        history.pushBack(command);
+    public void logOperation(Command command) {
+        operationHistory.log(command);
     }
-
-    Account getAccountById(String accountId) {
-        return accountMap.getOrDefault(accountId, null);
-    }
-
-    public Map<String, Customer> getCustomerMap(){
-
-        return customerMap;
+    public void setInterbankPaymentSystem(InterbankPaymentSystemMediator ibp) {
+        interbankPaymentSystem = ibp;
     }
 }

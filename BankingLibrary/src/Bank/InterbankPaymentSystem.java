@@ -1,59 +1,68 @@
 package Bank;
 
+import Bank.*;
+import Bank.Commands.IncomingExternalTransferCommand;
+import Bank.Commands.IngoingTransferCommand;
+
 import java.util.*;
 
-public class InterbankPaymentSystem implements InterbankMediator {
-
-    public InterbankPaymentSystem() {
-        this.bankMap = new HashMap<>();
-        this.pendingTransfers = new HashMap<>();
+public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
+    Map<Bank, List<InterbankTransfer>> banks;
+    History history;
+    InterbankPaymentSystem() {
+        this.banks = new HashMap<>();
+        this.history = new History();
     }
-    private Map<String, Bank> bankMap;
-    private Map<String, List<ExternalTransfer>> pendingTransfers;
+    @Override
+    public void registerBank(Bank bank) {
+        if (!banks.containsKey(bank)) {
+            banks.put(bank, new ArrayList<>());
+        }
+    }
 
     @Override
-    public boolean transferNotify(Bank bank, ExternalTransfer transfer) {
-        var recipientBankCode = transfer.getRecipientBankId();
-
-        if (bank.bankCode.equals(transfer.getRecipientBankId())) {
-            recipientBankCode = transfer.getSourceBankId();
-        }
-
-        if (!bankMap.containsKey(recipientBankCode)) return false;
-
-        if (pendingTransfers.containsKey(recipientBankCode)) {
-            pendingTransfers.get(recipientBankCode).add(transfer);
-        }
-        else {
-            pendingTransfers.put(recipientBankCode, List.of(transfer));
-        }
-
-        return true;
-    }
-    public boolean registerBank(Bank bank) {
-        if (bankMap.containsKey(bank.bankCode)) return false;
-
-        bankMap.put(bank.bankCode, bank);
-        bank.setInterbankMediator(this);
-        return true;
-    }
-    public boolean unregisterBank(Bank bank) {
-        if (bankMap.containsKey(bank.bankCode)) {
-            bankMap.remove(bank.bankCode);
-            bank.setInterbankMediator(null);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean batchTransfer(String bankId) {
-        if (pendingTransfers.containsKey(bankId)) {
-            for (var transfer : pendingTransfers.get(bankId)) {
-                bankMap.get(bankId).receiveExternalPayment(transfer);
+    public void unregisterBank(Bank bank) {
+        if (banks.containsKey(bank)) {
+            if (banks.get(bank).isEmpty()) {
+                banks.remove(bank);
             }
-            pendingTransfers.remove(bankId);
-            return true;
+            else {
+                // todo execute transactions??
+            }
         }
-        return false;
     }
+
+    @Override
+    public void notify(Bank bank, InterbankTransfer transfer) {
+        if (banks.containsKey(bank)) {
+            if (banks.keySet().stream().noneMatch(b -> Objects.equals(b.bankCode, transfer.destinationAccountNumber().getBankIdentifier()))) {
+                InterbankTransfer changedTransfer = new InterbankTransfer(null, transfer.sourceAccountNumber(), transfer.amount(), transfer.text(), InterbankTransferType.RETURNING_TRANSFER_NO_SUCH_BANK);
+                assert Objects.equals(bank.bankCode, changedTransfer.destinationAccountNumber().getBankIdentifier()); // Sanity check
+                banks.get(bank).add(changedTransfer);
+            }
+            else {
+                banks.get(bank).add(transfer);
+            }
+        }
+    }
+
+    @Override
+    public void receiveTransfers(Bank bank) {
+        if (banks.containsKey(bank)) {
+            for (var transaction : banks.get(bank)) {
+                switch (transaction.type()) {
+                    case INCOMING_TRANSFER -> {
+                        bank.executeOperation(new IncomingExternalTransferCommand(bank, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
+                    }
+                    case RETURNING_TRANSFER_NO_SUCH_ACCOUNT -> {
+                        // todo
+                    }
+                    case RETURNING_TRANSFER_NO_SUCH_BANK -> {
+                        // todo
+                    }
+                }
+            }
+        }
+    }
+
 }

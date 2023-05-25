@@ -1,22 +1,20 @@
 package Bank;
 
+import Bank.Commands.Command;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class History {
-    private List<Command> commands;
+    List<Command> commandList;
 
-    History() {
-        commands = new ArrayList<>();
+    public History() {
+        this.commandList = new ArrayList<>();
     }
-
-    public boolean pushBack(Command command) {
-        return commands.add(command);
+    public List<Command> getCommandList() {
+        return commandList;
     }
-    public Command popBack() {
-        return commands.remove(commands.size() - 1);
-    }
-    public List<Command> getCommandHistory() {
-        return commands;
+    public void log(Command command) {
+        commandList.add(command);
     }
 }

@@ -1,103 +1,48 @@
 package Bank;
 
-import java.time.LocalDate;
-import java.util.Currency;
+import Bank.Commands.Command;
 
+import java.time.LocalDateTime;
 
-public class Account implements InterestApplicableProduct {
-    public double interestRate;
-
-    public InterestRateStrategy myInterestRateStrategy;
-    private static long idCounter=0;
-    private String accountId;
-    protected Customer owner;
-    private LocalDate opening;
-    protected double balance;
-    private Currency currency;
-    private History history;
-    Account(Customer owner, double startingBalance, Currency currency) {
-        this(owner);
-        this.balance = startingBalance;
-        this.currency = currency;
+public class Account {
+    public final AccountNumber accountNumber;
+    private Customer owner;
+    private Bank owningBank;
+    private double balance;
+    private LocalDateTime dateOfOpening;
+    private History operationHistory;
+    Account(Bank owningBank, Customer owner, AccountNumber accountNumber) {
+        this(owningBank, owner, accountNumber, 0.0);
     }
-    Account(Customer owner){
-        accountId = String.format(owner.getBankRef().bankCode + "%010d", idCounter++);
+    Account(Bank owningBank, Customer owner, AccountNumber accountNumber, double startingBalance) {
+        this.owningBank = owningBank;
+        this.accountNumber = accountNumber;
         this.owner = owner;
-        opening = LocalDate.now();
-        balance = 0.0;
-        history = new History();
+        this.balance = startingBalance;
+        this.operationHistory = new History();
+        this.dateOfOpening = LocalDateTime.now();
     }
-
-    public double getBalance() {
-        return balance;
-    }
-    void updateBalance(double delta) throws Exception{
-        if (balance + delta < 0.0)
-            throw new Exception("Update would result in negative balance");
-        balance = balance+delta;
-    }
-
-    public String getId() {
-        return accountId;
-    }
-
     Customer getOwner() {
         return owner;
     }
-
-    boolean executeCommand(Command command) {
-        if (command.execute()) {
-            history.pushBack(command);
-            owner.getBankRef().informCommandExecutionOnAccount(command);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean orderTransfer(double amount, Currency currency, String recipientAccountId, String text) {
-        return owner.getBankRef().executeCommand(new OrderTransferCommand(owner.getBankRef(), this, amount, currency, recipientAccountId, text));
-    }
-
-    @Override
-    public double getProductPrincipalAmount() {
+    public double getBalance() {
         return balance;
     }
-
-    @Override
-    public double getProductRate() {
-        return interestRate;
-
+    LocalDateTime getDateOfOpening() {
+        return dateOfOpening;
     }
-
-    @Override
-    public int getProductTime() {//czas calego okresu waloryzacji, to jeden okres kapitalizacji, takze
-        //tutaj jedynka nie wazne czy robimy co miesiac czy co sekunde.
-        return 1;
+    public void increaseBalance(double amount) {
+        balance += Math.abs(amount);
     }
-
-    @Override
-    public int getProductCompoundFrequency() {//tutaj tak samo jedynka zeby pasowalo do wzoru jakby ktos chcial uzyc startegii compound frequency
-
-        return 1;
+    public boolean decreaseBalance(double amount) {
+        if (balance - Math.abs(amount) < 0) return false;
+        balance -= Math.abs(amount);
+        return true;
     }
-
-    @Override
-    public void changeInterestRate(double rate) {
-        this.interestRate=rate;
-    }
-
-    @Override
-    public Double calculateInterest() {
-        return myInterestRateStrategy.calculateInterest(this);
-    }
-
-    @Override
-    public boolean isDeposit() {
-        return false;
-    }
-
-    @Override
-    public boolean isLoan() {
-        return false;
+    public boolean executeOperation(Command command) {
+        command.execute();
+        operationHistory.log(command);
+        owningBank.logOperation(command);
+        return true;
     }
 }
