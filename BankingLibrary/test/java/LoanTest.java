@@ -44,7 +44,7 @@ public class LoanTest {
     void takeLoan() {
         Customer cuz=bankA.getCustomerMap().get("johnny");
         InterestRateStrategy concreteStrategy1=new CompoundStrategyInterest();
-        cuz.takeLoan(Currency.getInstance("PLN"),1000,0.20,10,12,concreteStrategy1);
+        cuz.takeLoan(Currency.getInstance("PLN"),1000,0.20,10,1,concreteStrategy1);
 
 
 
@@ -62,7 +62,7 @@ public class LoanTest {
         //InterestRateStrategy concreteStrategy3=new CompoundStrategyInterest();
         //InterestRateStrategy concreteStrategy4=new CompoundStrategyInterest();
         //InterestRateStrategy concreteStrategy5=new CompoundStrategyInterest();
-        loan.changeInterestRate(0.02);
+        loan.setInterestRate(0.02);
         loan.setProductCompoundFrequency(1);
         loan.setProductTime(1);
         loan.setProductPrincipalAmount(1000);

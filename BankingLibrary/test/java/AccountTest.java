@@ -2,6 +2,7 @@ import Bank.Account;
 import Bank.Bank;
 import Bank.Customer;
 import Bank.LogonData;
+import Bank.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -25,8 +26,8 @@ public class AccountTest {
         LogonData logonData = new LogonData("username", "password!");
         Customer customer = bank.registerCustomer(customerName, customerSurname, customerDateOfBirth, logonData);
         bank.openAccount(logonData);
-        fail("Do not access data like this. Tests are not a valid reason to change API");
-        //account = bank.getCustomerAccounts(customer).get(0);
+        //fail("Do not access data like this. Tests are not a valid reason to change API");
+        account = bank.getCustomerAccounts(customer).get(0);
     }
 
     @AfterEach
@@ -61,5 +62,23 @@ public class AccountTest {
         //account.updateBalance(10000000000000000.);
         //account.updateBalance(-10000000000000000.);
         assertEquals(1, account.getBalance(), 0.01);
+    }
+
+
+    @Test
+    void updateInterestBalance() {//throws Exception{
+        //We should consider moving to BigDecimal
+        //fail("Do not access data like this. Tests are not a valid reason to change API");
+        InterestRateStrategy concreteStrategy1= new SimpleInterestRateStrategy();
+        account.setInterestRateStrategy(concreteStrategy1);
+        account.setBalance(1000);
+        account.setProductTime(1);
+        account.setProductCompoundFrequency(1);
+        account.setProductPrincipalAmount(1000);
+        account.setInterestRate(0.20);
+        double temp= account.calculateInterest();
+        account.setBalance(temp);
+        System.out.println(account.getBalance());
+        assertEquals(200, account.getBalance());
     }
 }

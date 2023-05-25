@@ -78,7 +78,7 @@ public class Customer {
     };
     public void repayRate(){};
     public void repayLoanFull(){};
-    public void makeDeposit( float principalAmount,Currency currency, double rate, int time,int compoundFrequency,
+    public void makeDeposit( Currency currency,float principalAmount, double rate, int time,int compoundFrequency,
                       InterestRateStrategy concreteInterestRate){
         Deposit E=new Deposit(this,  currency, principalAmount,  time,  compoundFrequency,  rate,concreteInterestRate);
         if(this.customerDeposits==null){

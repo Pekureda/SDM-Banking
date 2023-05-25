@@ -56,21 +56,18 @@ public class DepositTest {
         }
 
         @Test
-        void takeLoan() {
+        void makeDeposit() {
             Account accountA = bankA.logIn(logonDataA1).get(0);
             Customer cuz=bankA.getCustomerMap().get("johnny");
             InterestRateStrategy concreteStrategy=new CompoundStrategyInterest();
-            cuz.takeLoan(Currency.getInstance("PLN"),1000,0.04,10,1,concreteStrategy);
+            cuz.makeDeposit(Currency.getInstance("PLN"),1000,0.20,10,
+                    1,concreteStrategy);
 /*
-            Account accountA1 = bankA.logIn(logonDataA1);//nie ma sposobu jak rozpoznac czy cos jest pozyczką
-            if(accountA1 instanceof  Loan){
-                 System.out.println("udalo sie jestem pozyczka");
-             }
-             Loan loan=(Loan) accountA1;////////tu nie dziala
+
 */
-            Loan loan= cuz.getCustomerLoans().get(0);
-            double dupa=loan.calculateInterest();
-            System.out.println(dupa);
+            Deposit deposit= cuz.customerDeposits.get(0);
+            double currentInterest=deposit.calculateInterest();
+            System.out.println(currentInterest);
 
 
 

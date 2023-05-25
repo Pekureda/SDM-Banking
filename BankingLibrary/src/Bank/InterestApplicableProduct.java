@@ -11,7 +11,7 @@ public interface InterestApplicableProduct {
     double getProductPrincipalAmount();
     void setProductPrincipalAmount(double newPrincipalAmount);
     double getProductRate();//monthly
-    void changeInterestRate(double rate);
+    void setInterestRate(double rate);
     int getProductTime();//in months
     void setProductTime(int time);
     int getProductCompoundFrequency();

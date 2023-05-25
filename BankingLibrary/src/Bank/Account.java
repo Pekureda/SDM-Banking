@@ -43,6 +43,10 @@ public class Account implements InterestApplicableProduct {
         balance = balance+delta;
     }
 
+    public void setBalance(double balance){
+        this.balance=balance;
+    }
+
     public String getId() {
         return accountId;
     }
@@ -98,7 +102,7 @@ public class Account implements InterestApplicableProduct {
     }
 
     @Override
-    public void changeInterestRate(double rate) {
+    public void setInterestRate(double rate) {
         this.interestRate=rate;
     }
 

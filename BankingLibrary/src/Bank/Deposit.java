@@ -7,7 +7,6 @@ public class Deposit extends Account implements InterestApplicableProduct{
     public float current_deposit=0;
     public float deposit_total_money_time;
     public double principal;
-    public double rate;
     public int time;
     public int compoundFrequency;
     public boolean isDeposit=true;
@@ -22,63 +21,67 @@ public class Deposit extends Account implements InterestApplicableProduct{
         this.compoundFrequency=compoundFrequency;
 
         this.principalAmount=this.current_deposit;
-        this.interestRate=rate;
+        super.interestRate=rate;
 
     }
 
 
 
     @Override
-    public double getProductPrincipalAmount() {
+    public double getProductPrincipalAmount(){
         return principalAmount;
     }
 
     @Override
-    public double getProductRate() {
-        return rate;
+    public double getProductRate(){
+        return interestRate;
     }
 
     @Override
-    public int getProductTime() {
+    public int getProductTime(){
         return time;
     }
 
     @Override
-    public int getProductCompoundFrequency() {
+    public int getProductCompoundFrequency(){
         return compoundFrequency;
     }
 
     @Override
-    public void setProductCompoundFrequency(int compoundFrequency) {
+    public void setProductCompoundFrequency(int compoundFrequency){
          this.compoundFrequency=compoundFrequency;
     }
 
     @Override
-    public void changeInterestRate(double rate) {
+    public void setInterestRate(double rate){
     interestRate=rate;
     }
 
     @Override
-    public boolean isDeposit() {
+    public boolean isDeposit(){
         return true;
 
     }
 
     @Override
-    public Double calculateInterest() {
+    public Double calculateInterest(){
         return  myInterestRateStrategy.calculateInterest(this);
     }
 
     @Override
-    public boolean isLoan() {
+    public boolean isLoan(){
         return false;
     }
-    public void finishDepositEarly(Account accountToGiveMoneyTo){//usun obiekt
+    public double finishDepositEarly(double penalty){
 
+        double temp=this.current_deposit-penalty;
+
+        //todo destroy this object;
+    return temp;
     }
 
     @Override
-    public void setInterestRateStrategy(InterestRateStrategy concreteStrategy) {
+    public void setInterestRateStrategy(InterestRateStrategy concreteStrategy){
         this.myInterestRateStrategy=concreteStrategy;
     }
 

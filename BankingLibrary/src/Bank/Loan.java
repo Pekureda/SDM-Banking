@@ -62,7 +62,7 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
     }
 
     @Override
-    public void changeInterestRate(double rate) {
+    public void setInterestRate(double rate) {
         interestRate=rate;
 
     }

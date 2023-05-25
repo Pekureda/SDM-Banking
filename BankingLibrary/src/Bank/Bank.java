@@ -61,7 +61,7 @@ public class Bank {
         return null;
     }
 
-    List<Account> getCustomerAccounts(final Customer customer) {
+    public List<Account> getCustomerAccounts(final Customer customer) {
         return accountMap.values().stream().filter(acc -> acc.getOwner() == customer).toList();
     }
 
