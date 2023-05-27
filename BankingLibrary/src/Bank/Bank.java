@@ -4,7 +4,7 @@ import Bank.Commands.*;
 
 import java.util.*;
 
-public class Bank {
+public class Bank implements OperationExecutor {
     private long nextAccountNumber = 0;
     public final String bankCode;
     private InterbankPaymentSystemMediator interbankPaymentSystem;
@@ -25,10 +25,10 @@ public class Bank {
         customerMap.put(username, newCustomer);
         return newCustomer;
     }
-    public Account createAccount(Customer customer) {
+    public Account createAccount(Customer customer) { // todo add interest rate
         Customer owner;
         if ((owner = customerMap.get(customer.getUsername())) != null) {
-            AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%06d", nextAccountNumber));
+            AccountNumber newAccountNumber = getNextAccountNumber();
             nextAccountNumber++;
             Account newAccount = new Account(this, owner, newAccountNumber);
             accountMap.put(newAccountNumber.getInBankAccountNumber(), newAccount);
@@ -85,10 +85,25 @@ public class Bank {
         operationHistory.log(command);
         return true;
     }
+    public boolean createDeposit(Account account, double depositAmount) {
+        if (account.getBalance() < depositAmount) return false;
+        account.executeOperation(new CreateDepositCommand(this, account, getNextAccountNumber(), depositAmount));
+        return true;
+    }
+    public boolean createLoan(Account account, double borrowAmount) {
+        if (borrowAmount < 0) return false;
+        account.executeOperation(new CreateLoanCommand(this, account, getNextAccountNumber(), borrowAmount));
+        return true;
+    }
     public void logOperation(Command command) {
         operationHistory.log(command);
     }
     public void setInterbankPaymentSystem(InterbankPaymentSystemMediator ibp) {
         interbankPaymentSystem = ibp;
+    }
+    private AccountNumber getNextAccountNumber() {
+        AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%06d", nextAccountNumber));
+        nextAccountNumber += 1;
+        return newAccountNumber;
     }
 }
