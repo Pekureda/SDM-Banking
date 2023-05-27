@@ -46,6 +46,9 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     public History getHistory() {
         return operationHistory;
     }
+    public Bank getOwningBank() {
+        return owningBank;
+    }
 
     public boolean increaseBalance(double amount) {
         balance += Math.abs(amount);
@@ -65,6 +68,9 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     public boolean addDeposit(Deposit deposit) {
         depositMap.put(deposit.accountNumber.getInBankAccountNumber(), deposit);
         return true;
+    }
+    public boolean removeDeposit(Deposit deposit) {
+        return depositMap.remove(deposit.accountNumber.getInBankAccountNumber()) != null;
     }
     public boolean addLoan(Loan loan) {
         loanMap.put(loan.accountNumber.getInBankAccountNumber(), loan);

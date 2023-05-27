@@ -1,6 +1,7 @@
 package Bank;
 
 import Bank.Commands.*;
+import Bank.InterestRate.DepositInterestRateStrategy;
 
 import java.util.*;
 
@@ -85,9 +86,13 @@ public class Bank implements OperationExecutor {
         operationHistory.log(command);
         return true;
     }
-    public boolean createDeposit(Account account, double depositAmount) {
+    public boolean createDeposit(Account account, double depositAmount, DepositInterestRateStrategy depositInterestRateStrategy) {
         if (account.getBalance() < depositAmount) return false;
-        account.executeOperation(new CreateDepositCommand(this, account, getNextAccountNumber(), depositAmount));
+        account.executeOperation(new CreateDepositCommand(this, account, getNextAccountNumber(), depositAmount, depositInterestRateStrategy));
+        return true;
+    }
+    public boolean closeDeposit(Deposit deposit) {
+        deposit.getOwningAccount().executeOperation(new CloseDepositCommand(deposit));
         return true;
     }
     public boolean createLoan(Account account, double borrowAmount) {
