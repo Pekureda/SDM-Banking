@@ -110,15 +110,23 @@ public class Loan extends Account implements ReportableVisitable , InterestAppli
         if(super.balance<0){
             runningBelowInCredits=true;
         }
-        if(this.amountToRepay<0.01){
+        if(this.amountToRepay<0.01 && this.amountToRepay>0){
             this.amountToRepay=0;
+            //destroyLoan(); usuna z listy
         }
         if(this.amountToRepay<0){
             this.amountToRepay=0;
             super.balance=super.balance+ Math.abs( this.amountToRepay);
+            //destroyLoan();
+            //przelac pieniadze
+            this.accountId
+            super
         }
 
     }
+
+
+
 
     int getTimeLeft(){
         return this.timeLeft;

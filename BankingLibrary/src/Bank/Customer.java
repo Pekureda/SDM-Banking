@@ -65,7 +65,7 @@ public class Customer {
     public List<Loan> customerLoans;
     public List<Loan> getCustomerLoans(){return customerLoans;}
     InterestRateStrategy myInterestRateStrategy;
-
+//todo: przeniesc to do konta
     public void takeLoan( Currency currency,double principalAmount, double rate, int time,int compoundFrequency,
                    InterestRateStrategy concreteInterestRate){
         Loan loan=new Loan(this, currency,principalAmount,rate,time,compoundFrequency,concreteInterestRate);
@@ -88,7 +88,7 @@ public class Customer {
         this.customerDeposits.add(E);
     };
     public void closeDeposit(){};
-
+//koniec todo
 
 
 
