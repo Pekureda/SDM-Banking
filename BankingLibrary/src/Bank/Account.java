@@ -40,9 +40,9 @@ public class Account {
         return true;
     }
     public boolean executeOperation(Command command) {
-        command.execute();
+        boolean result = command.execute();
         operationHistory.log(command);
         owningBank.logOperation(command);
-        return true;
+        return result;
     }
 }

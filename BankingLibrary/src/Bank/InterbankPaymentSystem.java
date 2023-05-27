@@ -1,6 +1,7 @@
 package Bank;
 
 import Bank.*;
+import Bank.Commands.IncomingExternalReturningTransferCommand;
 import Bank.Commands.IncomingExternalTransferCommand;
 import Bank.Commands.IngoingTransferCommand;
 
@@ -23,42 +24,46 @@ public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
     @Override
     public void unregisterBank(Bank bank) {
         if (banks.containsKey(bank)) {
-            if (banks.get(bank).isEmpty()) {
-                banks.remove(bank);
+            if (!banks.get(bank).isEmpty()) {
+                // todo execute transactions
+                receiveTransfers(bank);
             }
-            else {
-                // todo execute transactions??
-            }
+            banks.remove(bank);
         }
     }
 
     @Override
     public void notify(Bank bank, InterbankTransfer transfer) {
         if (banks.containsKey(bank)) {
-            if (banks.keySet().stream().noneMatch(b -> Objects.equals(b.bankCode, transfer.destinationAccountNumber().getBankIdentifier()))) {
-                InterbankTransfer changedTransfer = new InterbankTransfer(null, transfer.sourceAccountNumber(), transfer.amount(), transfer.text(), InterbankTransferType.RETURNING_TRANSFER_NO_SUCH_BANK);
-                assert Objects.equals(bank.bankCode, changedTransfer.destinationAccountNumber().getBankIdentifier()); // Sanity check
+            String destinationBankIdentifier = switch (transfer.type()) {
+                case INCOMING_TRANSFER -> transfer.destinationAccountNumber().getBankIdentifier();
+                case RETURNING_TRANSFER_NO_SUCH_ACCOUNT, RETURNING_TRANSFER_NO_SUCH_BANK -> transfer.sourceAccountNumber().getBankIdentifier();
+            };
+
+            Optional<Bank> destinationBank = banks.keySet().stream().filter(b -> Objects.equals(b.bankCode, destinationBankIdentifier)).findFirst();
+            if (destinationBank.isEmpty()) {
+                InterbankTransfer changedTransfer = new InterbankTransfer(transfer.sourceAccountNumber(), transfer.destinationAccountNumber(), transfer.amount(), transfer.text(), InterbankTransferType.RETURNING_TRANSFER_NO_SUCH_BANK);
+                assert Objects.equals(bank.bankCode, changedTransfer.sourceAccountNumber().getBankIdentifier()) && changedTransfer.type() == InterbankTransferType.RETURNING_TRANSFER_NO_SUCH_BANK; // Sanity check
                 banks.get(bank).add(changedTransfer);
             }
             else {
-                banks.get(bank).add(transfer);
+                banks.get(destinationBank.get()).add(transfer);
             }
         }
     }
-
     @Override
     public void receiveTransfers(Bank bank) {
         if (banks.containsKey(bank)) {
             for (var transaction : banks.get(bank)) {
                 switch (transaction.type()) {
                     case INCOMING_TRANSFER -> {
-                        bank.executeOperation(new IncomingExternalTransferCommand(bank, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
+                        bank.executeOperation(new IncomingExternalTransferCommand(bank, this, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
                     }
                     case RETURNING_TRANSFER_NO_SUCH_ACCOUNT -> {
-                        // todo
+                        bank.executeOperation(new IncomingExternalReturningTransferCommand(bank, this, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
                     }
                     case RETURNING_TRANSFER_NO_SUCH_BANK -> {
-                        // todo
+                        bank.executeOperation(new IncomingExternalReturningTransferCommand(bank, this, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
                     }
                 }
             }

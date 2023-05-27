@@ -10,7 +10,13 @@ public class Customer {
         this.username = username;
     }
 
-    String getUsername() {
+    public String getUsername() {
         return username;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getSurname() {
+        return surname;
     }
 }

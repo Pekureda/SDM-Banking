@@ -5,17 +5,17 @@ import Bank.*;
 import java.time.LocalDateTime;
 
 public class OutgoingExternalTransferCommand implements Command {
-    private final InterbankPaymentSystemMediator ibp;
-    private final Bank bank;
-    public final AccountNumber sourceAccountNumber;
+    protected final InterbankPaymentSystemMediator ibp;
+    protected final Bank bank;
+    public final Account sourceAccount;
     public final AccountNumber destinationAccountNumber;
     public final double amount;
     public final String text;
-    private LocalDateTime executionTime;
-    OutgoingExternalTransferCommand(Bank bank, InterbankPaymentSystemMediator ibp, AccountNumber sourceAccountNumber, AccountNumber destinationAccountNumber, double amount, String text) {
+    protected LocalDateTime executionTime;
+    public OutgoingExternalTransferCommand(Bank bank, InterbankPaymentSystemMediator ibp, Account sourceAccount, AccountNumber destinationAccountNumber, double amount, String text) {
         this.bank = bank;
         this.ibp = ibp;
-        this.sourceAccountNumber = sourceAccountNumber;
+        this.sourceAccount = sourceAccount;
         this.destinationAccountNumber = destinationAccountNumber;
         this.amount = amount;
         this.text = text;
@@ -23,7 +23,8 @@ public class OutgoingExternalTransferCommand implements Command {
     @Override
     public boolean execute() {
         executionTime = LocalDateTime.now();
-        ibp.notify(bank, new InterbankTransfer(sourceAccountNumber, destinationAccountNumber, amount, text, InterbankTransferType.INCOMING_TRANSFER));
+        sourceAccount.executeOperation(new OutgoingTransferCommand(sourceAccount, destinationAccountNumber, amount, text));
+        ibp.notify(bank, new InterbankTransfer(sourceAccount.accountNumber, destinationAccountNumber, amount, text, InterbankTransferType.INCOMING_TRANSFER));
         return true;
     }
     public LocalDateTime getExecutionTime() {

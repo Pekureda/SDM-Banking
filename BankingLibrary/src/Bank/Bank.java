@@ -1,7 +1,6 @@
 package Bank;
 
-import Bank.Commands.Command;
-import Bank.Commands.InternalTransferCommand;
+import Bank.Commands.*;
 
 import java.util.*;
 
@@ -22,14 +21,18 @@ public class Bank {
         if (customerMap.containsKey(username)) {
             return null;
         }
-        return customerMap.put(username, new Customer(name, surname, username));
+        Customer newCustomer = new Customer(name, surname, username);
+        customerMap.put(username, newCustomer);
+        return newCustomer;
     }
     public Account createAccount(Customer customer) {
         Customer owner;
         if ((owner = customerMap.get(customer.getUsername())) != null) {
-            AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%010d", nextAccountNumber));
+            AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%06d", nextAccountNumber));
             nextAccountNumber++;
-            return accountMap.put(newAccountNumber.getInBankAccountNumber(), new Account(this, owner, newAccountNumber));
+            Account newAccount = new Account(this, owner, newAccountNumber);
+            accountMap.put(newAccountNumber.getInBankAccountNumber(), newAccount);
+            return newAccount;
         }
         return null;
     }
@@ -55,6 +58,7 @@ public class Bank {
             if (accountMap.containsKey(destination.getInBankAccountNumber())) {
                 Account destinationAccount = accountMap.get(destination.getInBankAccountNumber());
                 executeOperation(new InternalTransferCommand(this, source, destinationAccount, amount, text));
+                return true;
             }
             else {
                 return false;
@@ -62,13 +66,20 @@ public class Bank {
             }
         }
         else {
-            // todo this is external transfer
+            executeOperation(new OutgoingExternalTransferCommand(this, interbankPaymentSystem, source, destination, amount, text));
         }
 
         // Should not reach this point
         return false;
     }
-
+    public boolean payment(Account recipient, double amount) {
+        if (recipient == null) return false;
+        return recipient.executeOperation(new DirectPaymentCommand(recipient, amount));
+    }
+    public boolean withdraw(Account target, double amount) {
+        if (target == null) return false;
+        return target.executeOperation(new WithdrawCommand(target, amount));
+    }
     public boolean executeOperation(Command command) {
         command.execute();
         operationHistory.log(command);
