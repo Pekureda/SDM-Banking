@@ -19,6 +19,8 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     protected Customer owner;
     protected Bank owningBank;
     protected Double balance;
+    private boolean isDebit;
+    private double overdraftLimit;
     protected LocalDateTime dateOfOpening;
     protected History operationHistory;
     private Map<String, Deposit> depositMap;
@@ -60,7 +62,7 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
         return true;
     }
     public boolean decreaseBalance(double amount) {
-        if (balance - Math.abs(amount) < 0) return false;
+        if (balance - Math.abs(amount) < (isDebit ? overdraftLimit : 0.0)) return false;
         balance -= Math.abs(amount);
         return true;
     }
@@ -81,6 +83,11 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
         loanMap.put(loan.accountNumber.getInBankAccountNumber(), loan);
         return true;
     }
+    public boolean setDebit(boolean state, double overdraftLimit) {
+        this.isDebit = state;
+        this.overdraftLimit = overdraftLimit;
+        return true;
+    }
     public List<Loan> getLoans() {
         return loanMap.values().stream().toList();
     }
@@ -90,8 +97,10 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     public boolean applyInterest() {
         return executeOperation(new ApplyInterestCommand(this, interestRateStrategy));
     }
-    public void setInterestRateStrategy(AccountInterestRateStrategy accountInterestRateStrategy) {
-        this.interestRateStrategy = accountInterestRateStrategy;
+    public boolean setInterestRateStrategy(InterestRateStrategy interestRateStrategy) {
+        if (!(interestRateStrategy instanceof AccountInterestRateStrategy))  return false;
+        this.interestRateStrategy = interestRateStrategy;
+        return true;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package Bank;
 
+import Bank.InterestRate.AccountInterestRateStrategy;
+import Bank.InterestRate.DepositInterestRateStrategy;
+import Bank.InterestRate.InterestRateStrategy;
 import Bank.InterestRate.LoanInterestRateStrategy;
 
 import java.util.List;
@@ -40,5 +43,15 @@ public class Loan extends Account {
     @Override
     public List<Deposit> getDeposits() {
         return null;
+    }
+    @Override
+    public boolean setInterestRateStrategy(InterestRateStrategy interestRateStrategy) {
+        if (!(interestRateStrategy instanceof LoanInterestRateStrategy))  return false;
+        this.interestRateStrategy = interestRateStrategy;
+        return true;
+    }
+    @Override
+    public boolean setDebit(boolean state, double overdraftLimit) {
+        return false;
     }
 }

@@ -278,8 +278,8 @@ class BankTest {
         assertTrue(bank.createDeposit(customerAccount, 100, new SimpleDepositInterestRateStrategy(10, LocalDate.now().minusDays(1))));
         assertTrue(bank.createDeposit(customerAccount, 100, new SimpleDepositInterestRateStrategy(10, LocalDate.now().plusDays(2))));
         assertEquals(300, customerAccount.getBalance());
-        Deposit customerDepositDue = customerAccount.getDeposits().get(0);
-        Deposit customerDepositNotDue = customerAccount.getDeposits().get(1);
+        Deposit customerDepositDue = customerAccount.getDeposits().get(1);
+        Deposit customerDepositNotDue = customerAccount.getDeposits().get(0);
 
         // Apply interest rate to deposit
         customerDepositDue.applyInterest();
@@ -299,6 +299,20 @@ class BankTest {
         // Close not due deposit
         bank.closeDeposit(customerDepositNotDue);
         assertEquals(510, customerAccount.getBalance());
+
+        // Testing change interest rate
+        assertTrue(bank.createDeposit(customerAccount, 100, new SimpleDepositInterestRateStrategy(10, LocalDate.now().minusDays(1))));
+        Deposit customerDepositChangedRate = customerAccount.getDeposits().get(0);
+        customerDepositChangedRate.applyInterest();
+        assertEquals(110, customerDepositChangedRate.getBalance());
+
+        bank.changeInterestRateOfProduct(customerDepositChangedRate, new SimpleDepositInterestRateStrategy(50, LocalDate.now().minusDays(1)));
+        customerDepositChangedRate.applyInterest();
+        assertEquals(165, customerDepositChangedRate.getBalance());
+
+        assertTrue(customerDepositChangedRate.isDue());
+        bank.closeDeposit(customerDepositChangedRate);
+        assertEquals(575, customerAccount.getBalance());
     }
 
     @Test

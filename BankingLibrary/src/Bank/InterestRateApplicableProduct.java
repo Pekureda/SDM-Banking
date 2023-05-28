@@ -1,5 +1,7 @@
 package Bank;
 
+import Bank.InterestRate.InterestRateStrategy;
+
 import java.time.LocalDateTime;
 
 public interface InterestRateApplicableProduct {

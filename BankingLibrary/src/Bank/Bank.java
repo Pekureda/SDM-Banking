@@ -137,6 +137,9 @@ public class Bank implements OperationExecutor, VisitorReceiver {
         }
         return result;
     }
+    public boolean changeInterestRateOfProduct(Account product, InterestRateStrategy newInterestRateStrategy) {
+        return product.executeOperation(new ChangeInterestRateCommand(product, newInterestRateStrategy));
+    }
 
     public List<Loan> getLoansForAccount(Account account) {
         return account.getLoans();
@@ -149,6 +152,10 @@ public class Bank implements OperationExecutor, VisitorReceiver {
         if (Math.abs(loan.getBalance()) < Math.abs(amount)) return false;
 
         return executeOperation(new InternalTransferCommand(this, account, loan, amount, "REPAY LOAN: " + loan.accountNumber));
+    }
+    public boolean setAccountDebit(Account account, boolean state, double overdraftLimit) {
+        if (account.getClass() != Account.class) return false;
+        return account.setDebit(state, overdraftLimit);
     }
     public History getOperationHistory() {
         return operationHistory;

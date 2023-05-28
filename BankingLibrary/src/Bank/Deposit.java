@@ -3,6 +3,7 @@ package Bank;
 import Bank.Commands.InternalTransferCommand;
 import Bank.InterestRate.AccountInterestRateStrategy;
 import Bank.InterestRate.DepositInterestRateStrategy;
+import Bank.InterestRate.InterestRateStrategy;
 
 import java.util.List;
 
@@ -57,5 +58,15 @@ public class Deposit extends Account {
     }
     public double getStartingBalance() {
         return startingBalance;
+    }
+    @Override
+    public boolean setInterestRateStrategy(InterestRateStrategy interestRateStrategy) {
+        if (!(interestRateStrategy instanceof DepositInterestRateStrategy))  return false;
+        this.interestRateStrategy = interestRateStrategy;
+        return true;
+    }
+    @Override
+    public boolean setDebit(boolean state, double overdraftLimit) {
+        return false;
     }
 }

@@ -19,6 +19,6 @@ public class SimpleDepositInterestRateStrategy implements DepositInterestRateStr
     }
     @Override
     public boolean isDue() {
-        return LocalDate.now().isBefore(dueDate);
+        return LocalDate.now().isAfter(dueDate);
     }
 }
