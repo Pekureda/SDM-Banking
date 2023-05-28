@@ -2,6 +2,7 @@ package Bank;
 
 import Bank.Commands.*;
 import Bank.InterestRate.DepositInterestRateStrategy;
+import Bank.Reporting.AccountVisitor;
 
 import java.util.*;
 
@@ -110,5 +111,14 @@ public class Bank implements OperationExecutor {
         AccountNumber newAccountNumber = new AccountNumber(bankCode, String.format("%06d", nextAccountNumber));
         nextAccountNumber += 1;
         return newAccountNumber;
+    }
+    public List<Account> doAccountReport(AccountVisitor visitor) {
+        List<Account> result = new ArrayList<Account>();
+        for (Account acc : accountMap.values()) {
+            if (acc.accept(visitor) != null) {
+                result.add(acc);
+            }
+        }
+        return result;
     }
 }

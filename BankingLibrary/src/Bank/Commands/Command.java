@@ -1,5 +1,7 @@
 package Bank.Commands;
 
-public interface Command {
+import Bank.VisitorReceiver;
+
+public interface Command extends VisitorReceiver {
     public boolean execute();
 }

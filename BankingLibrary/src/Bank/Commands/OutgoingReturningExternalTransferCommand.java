@@ -1,6 +1,9 @@
 package Bank.Commands;
 
 import Bank.*;
+import Bank.Reporting.AccountVisitor;
+import Bank.Reporting.CustomerVisitor;
+import Bank.Reporting.TransactionVisitor;
 
 import java.time.LocalDateTime;
 
@@ -25,5 +28,18 @@ public class OutgoingReturningExternalTransferCommand implements Command {
         executionTime = LocalDateTime.now();
         ibp.notify(bank, new InterbankTransfer(sourceAccountNumber, destinationAccountNumber, amount, text, InterbankTransferType.RETURNING_TRANSFER_NO_SUCH_ACCOUNT));
         return true;
+    }
+    @Override
+    public Account accept(AccountVisitor visitor) {
+        return null;
+    }
+
+    @Override
+    public Command accept(TransactionVisitor visitor) {
+        return visitor.visit(this);
+    }
+    @Override
+    public Customer accept(CustomerVisitor visitor) {
+        return null;
     }
 }

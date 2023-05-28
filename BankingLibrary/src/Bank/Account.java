@@ -5,12 +5,15 @@ import Bank.Commands.Command;
 import Bank.InterestRate.AccountInterestRateStrategy;
 import Bank.InterestRate.InterestRateStrategy;
 import Bank.InterestRate.SimpleDepositInterestRateStrategy;
+import Bank.Reporting.AccountVisitor;
+import Bank.Reporting.CustomerVisitor;
+import Bank.Reporting.TransactionVisitor;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Account implements InterestRateApplicableProduct, OperationExecutor {
+public class Account implements InterestRateApplicableProduct, OperationExecutor, VisitorReceiver {
     public final AccountNumber accountNumber;
     protected Customer owner;
     protected Bank owningBank;
@@ -81,5 +84,20 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     }
     public void setInterestRateStrategy(AccountInterestRateStrategy accountInterestRateStrategy) {
         this.interestRateStrategy = accountInterestRateStrategy;
+    }
+
+    @Override
+    public Account accept(AccountVisitor visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
+    public Command accept(TransactionVisitor visitor) {
+        return null;
+    }
+
+    @Override
+    public Customer accept(CustomerVisitor visitor) {
+        return null;
     }
 }

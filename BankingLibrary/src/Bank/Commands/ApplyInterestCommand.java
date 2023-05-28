@@ -2,6 +2,9 @@ package Bank.Commands;
 
 import Bank.*;
 import Bank.InterestRate.InterestRateStrategy;
+import Bank.Reporting.AccountVisitor;
+import Bank.Reporting.CustomerVisitor;
+import Bank.Reporting.TransactionVisitor;
 
 import java.time.LocalDateTime;
 
@@ -32,5 +35,20 @@ public class ApplyInterestCommand implements Command {
             return null;
         }
         return interest;
+    }
+
+    @Override
+    public Account accept(AccountVisitor visitor) {
+        return null;
+    }
+
+    @Override
+    public Command accept(TransactionVisitor visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
+    public Customer accept(CustomerVisitor visitor) {
+        return null;
     }
 }
