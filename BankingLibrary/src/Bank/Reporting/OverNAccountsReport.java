@@ -4,7 +4,7 @@ import Bank.Account;
 
 public class OverNAccountsReport implements AccountVisitor {
     public final double N;
-    OverNAccountsReport(double N) {
+    public OverNAccountsReport(double N) {
         this.N = N;
     }
     @Override

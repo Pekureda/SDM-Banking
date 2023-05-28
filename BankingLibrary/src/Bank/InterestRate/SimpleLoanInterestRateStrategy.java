@@ -2,15 +2,16 @@ package Bank.InterestRate;
 
 import Bank.InterestRateApplicableProduct;
 
-public class SimpleAccountInterestRateStrategy implements AccountInterestRateStrategy {
+import java.time.LocalDate;
+
+public class SimpleLoanInterestRateStrategy implements LoanInterestRateStrategy {
     public final double percentage;
-    public SimpleAccountInterestRateStrategy(double percentage) {
+    public SimpleLoanInterestRateStrategy(double percentage) {
         this.percentage = percentage;
     }
     @Override
     public double applyInterest(InterestRateApplicableProduct product) {
         double interest = product.getBalance() * percentage / 100;
-        if (interest > product.getBalance()) interest = product.getBalance();
         product.decreaseBalance(interest);
         return interest;
     }

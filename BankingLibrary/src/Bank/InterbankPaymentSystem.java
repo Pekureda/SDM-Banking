@@ -10,7 +10,7 @@ import java.util.*;
 public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
     Map<Bank, List<InterbankTransfer>> banks;
     History history;
-    InterbankPaymentSystem() {
+    public InterbankPaymentSystem() {
         this.banks = new HashMap<>();
         this.history = new History();
     }
@@ -18,6 +18,7 @@ public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
     public void registerBank(Bank bank) {
         if (!banks.containsKey(bank)) {
             banks.put(bank, new ArrayList<>());
+            bank.setInterbankPaymentSystem(this);
         }
     }
 
@@ -28,6 +29,7 @@ public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
                 // todo execute transactions
                 receiveTransfers(bank);
             }
+            bank.setInterbankPaymentSystem(null);
             banks.remove(bank);
         }
     }
@@ -54,7 +56,8 @@ public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
     @Override
     public void receiveTransfers(Bank bank) {
         if (banks.containsKey(bank)) {
-            for (var transaction : banks.get(bank)) {
+            var transactionList = banks.get(bank);
+            for (var transaction : transactionList) {
                 switch (transaction.type()) {
                     case INCOMING_TRANSFER -> {
                         bank.executeOperation(new IncomingExternalTransferCommand(bank, this, transaction.sourceAccountNumber(), transaction.destinationAccountNumber(), transaction.amount(), transaction.text()));
@@ -67,6 +70,7 @@ public class InterbankPaymentSystem implements InterbankPaymentSystemMediator {
                     }
                 }
             }
+            banks.get(bank).clear();
         }
     }
 

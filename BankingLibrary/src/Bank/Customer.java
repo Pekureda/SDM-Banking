@@ -3,7 +3,9 @@ package Bank;
 import Bank.Commands.Command;
 import Bank.Reporting.AccountVisitor;
 import Bank.Reporting.CustomerVisitor;
-import Bank.Reporting.TransactionVisitor;
+import Bank.Reporting.HistoryVisitor;
+
+import java.util.List;
 
 public class Customer implements VisitorReceiver {
     private String username;
@@ -29,14 +31,12 @@ public class Customer implements VisitorReceiver {
     public Account accept(AccountVisitor visitor) {
         return null;
     }
-
-    @Override
-    public Command accept(TransactionVisitor visitor) {
-        return null;
-    }
-
     @Override
     public Customer accept(CustomerVisitor visitor) {
         return visitor.visit(this);
+    }
+    @Override
+    public List<Command> accept(HistoryVisitor visitor) {
+        return null;
     }
 }

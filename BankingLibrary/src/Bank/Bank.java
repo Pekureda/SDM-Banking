@@ -1,12 +1,17 @@
 package Bank;
 
 import Bank.Commands.*;
+import Bank.InterestRate.AccountInterestRateStrategy;
 import Bank.InterestRate.DepositInterestRateStrategy;
+import Bank.InterestRate.InterestRateStrategy;
+import Bank.InterestRate.LoanInterestRateStrategy;
 import Bank.Reporting.AccountVisitor;
+import Bank.Reporting.CustomerVisitor;
+import Bank.Reporting.HistoryVisitor;
 
 import java.util.*;
 
-public class Bank implements OperationExecutor {
+public class Bank implements OperationExecutor, VisitorReceiver {
     private long nextAccountNumber = 0;
     public final String bankCode;
     private InterbankPaymentSystemMediator interbankPaymentSystem;
@@ -27,12 +32,11 @@ public class Bank implements OperationExecutor {
         customerMap.put(username, newCustomer);
         return newCustomer;
     }
-    public Account createAccount(Customer customer) { // todo add interest rate
+    public Account createAccount(Customer customer, AccountInterestRateStrategy accountInterestRateStrategy) {
         Customer owner;
         if ((owner = customerMap.get(customer.getUsername())) != null) {
             AccountNumber newAccountNumber = getNextAccountNumber();
-            nextAccountNumber++;
-            Account newAccount = new Account(this, owner, newAccountNumber);
+            Account newAccount = new Account(this, owner, newAccountNumber, accountInterestRateStrategy);
             accountMap.put(newAccountNumber.getInBankAccountNumber(), newAccount);
             return newAccount;
         }
@@ -52,6 +56,7 @@ public class Bank implements OperationExecutor {
     }
 
     public boolean transfer(Account source, AccountNumber destination, double amount, String text) {
+        if (!Objects.equals(source.accountNumber.getBankIdentifier(), bankCode)) return false;
         if (source.getBalance() < amount) {
             return false;
             // todo handle debit accounts
@@ -59,19 +64,18 @@ public class Bank implements OperationExecutor {
         if (Objects.equals(destination.getBankIdentifier(), bankCode)) {
             if (accountMap.containsKey(destination.getInBankAccountNumber())) {
                 Account destinationAccount = accountMap.get(destination.getInBankAccountNumber());
-                executeOperation(new InternalTransferCommand(this, source, destinationAccount, amount, text));
-                return true;
+                return executeOperation(new InternalTransferCommand(this, source, destinationAccount, amount, text));
             }
             else {
                 return false;
                 // todo such account does not exist in this bank but is internal transfer
             }
         }
-        else {
-            executeOperation(new OutgoingExternalTransferCommand(this, interbankPaymentSystem, source, destination, amount, text));
+        else if (interbankPaymentSystem != null) {
+            return executeOperation(new OutgoingExternalTransferCommand(this, interbankPaymentSystem, source, destination, amount, text));
         }
 
-        // Should not reach this point
+        // Impossible to process payment. There is not any interbank payment system and the account does not exist here
         return false;
     }
     public boolean payment(Account recipient, double amount) {
@@ -96,9 +100,9 @@ public class Bank implements OperationExecutor {
         deposit.getOwningAccount().executeOperation(new CloseDepositCommand(deposit));
         return true;
     }
-    public boolean createLoan(Account account, double borrowAmount) {
+    public boolean createLoan(Account account, double borrowAmount, LoanInterestRateStrategy loanInterestRateStrategy) {
         if (borrowAmount < 0) return false;
-        account.executeOperation(new CreateLoanCommand(this, account, getNextAccountNumber(), borrowAmount));
+        account.executeOperation(new CreateLoanCommand(this, account, getNextAccountNumber(), loanInterestRateStrategy, borrowAmount));
         return true;
     }
     public void logOperation(Command command) {
@@ -120,5 +124,46 @@ public class Bank implements OperationExecutor {
             }
         }
         return result;
+    }
+    public List<Command> doOperationReport(VisitorReceiver reportableObject, HistoryVisitor visitor) {
+        return reportableObject.accept(visitor);
+    }
+    public List<Customer> doCustomerReport(CustomerVisitor visitor) {
+        List<Customer> result = new ArrayList<>();
+        for (Customer cust : customerMap.values()) {
+            if (cust.accept(visitor) != null) {
+                result.add(cust);
+            }
+        }
+        return result;
+    }
+
+    public List<Loan> getLoansForAccount(Account account) {
+        return account.getLoans();
+    }
+    public List<Deposit> getDepositsForAccount(Account account) {
+        return account.getDeposits();
+    }
+    public boolean repayLoan(Account account, Loan loan, double amount) {
+        if (account instanceof Loan || account instanceof Deposit) return false;
+        if (Math.abs(loan.getBalance()) < Math.abs(amount)) return false;
+
+        return executeOperation(new InternalTransferCommand(this, account, loan, amount, "REPAY LOAN: " + loan.accountNumber));
+    }
+    public History getOperationHistory() {
+        return operationHistory;
+    }
+
+    @Override
+    public Account accept(AccountVisitor visitor) {
+        return null;
+    }
+    @Override
+    public Customer accept(CustomerVisitor visitor) {
+        return null;
+    }
+    @Override
+    public List<Command> accept(HistoryVisitor visitor) {
+        return operationHistory.accept(visitor);
     }
 }

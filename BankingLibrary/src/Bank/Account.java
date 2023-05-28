@@ -7,10 +7,11 @@ import Bank.InterestRate.InterestRateStrategy;
 import Bank.InterestRate.SimpleDepositInterestRateStrategy;
 import Bank.Reporting.AccountVisitor;
 import Bank.Reporting.CustomerVisitor;
-import Bank.Reporting.TransactionVisitor;
+import Bank.Reporting.HistoryVisitor;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Account implements InterestRateApplicableProduct, OperationExecutor, VisitorReceiver {
@@ -23,10 +24,10 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     private Map<String, Deposit> depositMap;
     private Map<String, Loan> loanMap;
     protected InterestRateStrategy interestRateStrategy;
-    Account(Bank owningBank, Customer owner, AccountNumber accountNumber) {
-        this(owningBank, owner, accountNumber, 0.0);
+    Account(Bank owningBank, Customer owner, AccountNumber accountNumber, AccountInterestRateStrategy accountInterestRateStrategy) {
+        this(owningBank, owner, accountNumber, accountInterestRateStrategy, 0.0);
     }
-    Account(Bank owningBank, Customer owner, AccountNumber accountNumber, double startingBalance) {
+    Account(Bank owningBank, Customer owner, AccountNumber accountNumber, InterestRateStrategy interestRateStrategy, double startingBalance) {
         this.owningBank = owningBank;
         this.accountNumber = accountNumber;
         this.owner = owner;
@@ -35,6 +36,7 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
         this.dateOfOpening = LocalDateTime.now();
         this.depositMap = new HashMap<>();
         this.loanMap = new HashMap<>();
+        this.interestRateStrategy = interestRateStrategy;
     }
     public Customer getOwner() {
         return owner;
@@ -79,6 +81,12 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
         loanMap.put(loan.accountNumber.getInBankAccountNumber(), loan);
         return true;
     }
+    public List<Loan> getLoans() {
+        return loanMap.values().stream().toList();
+    }
+    public List<Deposit> getDeposits() {
+        return depositMap.values().stream().toList();
+    }
     public boolean applyInterest() {
         return executeOperation(new ApplyInterestCommand(this, interestRateStrategy));
     }
@@ -90,14 +98,12 @@ public class Account implements InterestRateApplicableProduct, OperationExecutor
     public Account accept(AccountVisitor visitor) {
         return visitor.visit(this);
     }
-
-    @Override
-    public Command accept(TransactionVisitor visitor) {
-        return null;
-    }
-
     @Override
     public Customer accept(CustomerVisitor visitor) {
         return null;
+    }
+    @Override
+    public List<Command> accept(HistoryVisitor visitor) {
+        return getHistory().accept(visitor);
     }
 }

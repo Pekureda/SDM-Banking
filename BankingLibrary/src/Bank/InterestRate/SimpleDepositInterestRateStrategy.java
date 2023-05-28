@@ -13,7 +13,7 @@ public class SimpleDepositInterestRateStrategy implements DepositInterestRateStr
     }
     @Override
     public double applyInterest(InterestRateApplicableProduct product) {
-        double interest = product.getBalance() * percentage;
+        double interest = product.getBalance() * percentage / 100;
         product.increaseBalance(interest);
         return interest;
     }

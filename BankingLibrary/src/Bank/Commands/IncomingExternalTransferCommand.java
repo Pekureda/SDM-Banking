@@ -3,9 +3,9 @@ package Bank.Commands;
 import Bank.*;
 import Bank.Reporting.AccountVisitor;
 import Bank.Reporting.CustomerVisitor;
-import Bank.Reporting.TransactionVisitor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class IncomingExternalTransferCommand implements Command {
     public final InterbankPaymentSystemMediator ibp;
@@ -14,7 +14,7 @@ public class IncomingExternalTransferCommand implements Command {
     public final AccountNumber destinationAccountNumber;
     public final double amount;
     public final String text;
-    private LocalDateTime executionTime;
+    protected LocalDateTime executionTime;
     public IncomingExternalTransferCommand(Bank bank, InterbankPaymentSystemMediator ibp, AccountNumber sourceAccountNumber, AccountNumber destinationAccountNumber, double amount, String text) {
         this.bank = bank;
         this.ibp = ibp;
@@ -32,7 +32,7 @@ public class IncomingExternalTransferCommand implements Command {
             bank.executeOperation(new OutgoingReturningExternalTransferCommand(bank, ibp, sourceAccountNumber, destinationAccountNumber, amount, text));
         }
         else {
-            bank.executeOperation(new IngoingTransferCommand(sourceAccountNumber, destinationAccount, amount, text));
+            destinationAccount.executeOperation(new IngoingTransferCommand(sourceAccountNumber, destinationAccount, amount, text));
         }
         return true;
     }
@@ -42,18 +42,5 @@ public class IncomingExternalTransferCommand implements Command {
             return null;
         }
         return executionTime;
-    }
-    @Override
-    public Account accept(AccountVisitor visitor) {
-        return null;
-    }
-
-    @Override
-    public Command accept(TransactionVisitor visitor) {
-        return visitor.visit(this);
-    }
-    @Override
-    public Customer accept(CustomerVisitor visitor) {
-        return null;
     }
 }
